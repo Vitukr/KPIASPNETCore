@@ -58,8 +58,14 @@ namespace KPIASPNETCore.Controllers
             {
                 Directory.CreateDirectory(folderPath);
             }
+
+            List<string> files = new List<string>();
             string[] fileEntries = Directory.GetFiles(folderPath);
-            return fileEntries;
+            foreach(var file in fileEntries)
+            {
+                files.Add((Path.Combine("/images", Path.GetFileName(file))).Replace('\\', '/'));
+            }
+            return files;
         }
     }
 }

@@ -53,20 +53,22 @@
                 </div>
             </form>
         </div>
-        <ul id="example-1">
-            <li v-for="item in items">
-                {{ item.message }}
-            </li>
-        </ul>
+        <div v-for="image in images" style="display:inline-block;">
+            <img v-bind:src="image" height="200">
+            </img>
+            <br/>
+            <label>{{name}}</label>
+            <br/>
+            <input v-model="comment" />
+        </div>
         <ul>
-            <li>
-                {{ images }}
+            <li v-for="image in images">
+                {{ image }}
             </li>
         </ul>
-        <div>{{ info }}</div>
     </div>
     <div v-else>
-        <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname">
+        <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname" />
     </div>
 </div>
 
@@ -74,23 +76,18 @@
     var app = new Vue({
         el: '#app',
         data: {
-            items: [
-                { message: 'Foo' },
-                { message: 'Bar' }
-            ],
             name: null,
             prename: null,
+            comment: null,
             topictures: false,
             isInitial: true,
             isSaving: false,
             filesnum: 0,
             info: 'testinfo',
-            images: '',
+            images: null,
         },
         updated() {
-            if (topictures) {
-                getimages(this.images);
-                //alert(this.info);
+            if (this.topictures) {
             }
         },
         methods: {
@@ -98,8 +95,8 @@
                 if (this.prename != null) {
                     this.name = this.prename;
                     this.topictures = true;
-                    getimages(this.images);
-                    //alert(this.info);
+                    this.getimages();
+                    //console.log(this.images);
                 }
                 else {
                     this.topictures = false;
@@ -107,19 +104,15 @@
             },
             save(formData) {
                 // upload data to the server
-                upload(formData)
-                    .then(x => {
-                        //this.uploadedFiles = [].concat(x);
-                        //this.currentStatus = STATUS_SUCCESS;
+                this.uploadImages(formData)
+                    .then(() => {
                         alert('Uploaded ' + this.filesnum + ' file(s).');
                         this.isInitial = true;
                         this.isSaving = false;
-                        getimages(this.images);
-                        //alert(this.info);
+                        this.getimages();
+                        //console.log(this.images);
                     })
                     .catch(err => {
-                        //this.uploadError = err.response;
-                        //this.currentStatus = STATUS_FAILED;
                         alert(err);
                         this.isInitial = true;
                         this.isSaving = false;
@@ -157,31 +150,45 @@
                     }
                 }
             },
+            getimages: function () {
+                axios.get('https://localhost:44361/api/FileUpload/GetImages')
+                    .then(function (response) {
+                        this.images = response.data;
+                        for (let i = 0; i < this.images.length; i++) {
+                            this.images[i] = window.location.origin + this.images[i];
+                        }
+                    }.bind(this))
+                    .catch(function (error) { console.log(error); })
+            },
+            uploadImages: function (formData) {
+                return axios.post("https://localhost:44361/api/FileUpload/Uploadfile", formData);
+            }
         },
     });
 
     //const BASE_URL = 'https://localhost:44361/';
 
-    function upload(formData) {
-        //const url = "${BASE_URL}/Home/Uploadfile";
-        return axios.post("https://localhost:44361/api/FileUpload/Uploadfile", formData);
-        // get data
-        //.then(x => x.data)
-        // add url field
-        //.then(x => x.map(img => Object.assign({}, img, { url: `${BASE_URL}/images/${img.id}` })));
-    }
+    //function getimages() {
+        //return
+        //axios.get('https://localhost:44361/api/FileUpload/GetImages')
+        //    .then(response => response.data)
+        //    .then(data => { this.images = data; alert(this.images);});
 
-    function getimages(images) {
-
-        axios.get('https://localhost:44361/api/FileUpload/GetImages')
-            .then(response => { images = response.data; alert(images); });
-    }
-
-    //this.$http.get('https://localhost:44361/api/FileUpload/GetImages')
-        //    .then(response => {
-        //    this.info = response.data.map((row) => {
-        //        return { 'src': row }
-        //    });
+        //fetch('https://localhost:44361/api/FileUpload/GetImages').then(function (response) {
+        //    if (response.ok) {
+        //        return response.json();
+        //    }
+        //    throw new Error('Network response was not ok.');
+        //}).then(function (json) {
+        //    this.images = [
+        //        { message: 'Foo1' },
+        //        { message: 'Bar1' }
+        //    ];
+        //    alert(this.images);
+        //}).catch(function (error) {
+        //    console.log('There has been a problem with your fetch operation: ' + error.message);
         //});
+
+    //}
 
 </script>
