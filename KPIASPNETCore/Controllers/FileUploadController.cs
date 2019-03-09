@@ -11,6 +11,7 @@ namespace KPIASPNETCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Produces("application/json")]
     public class FileUploadController : ControllerBase // IHostingEnvironment env
     {
         IHostingEnvironment _env;
@@ -47,6 +48,18 @@ namespace KPIASPNETCore.Controllers
             // Don't rely on or trust the FileName property without validation.
 
             return Ok(new { count = files.Count, size, folderPath });
+        }
+
+        [HttpGet("GetImages")]
+        public ActionResult<IEnumerable<string>> GetImages()
+        {
+            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            string[] fileEntries = Directory.GetFiles(folderPath);
+            return fileEntries;
         }
     }
 }

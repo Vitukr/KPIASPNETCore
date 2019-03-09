@@ -53,6 +53,17 @@
                 </div>
             </form>
         </div>
+        <ul id="example-1">
+            <li v-for="item in items">
+                {{ item.message }}
+            </li>
+        </ul>
+        <ul>
+            <li>
+                {{ images }}
+            </li>
+        </ul>
+        <div>{{ info }}</div>
     </div>
     <div v-else>
         <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname">
@@ -63,19 +74,32 @@
     var app = new Vue({
         el: '#app',
         data: {
+            items: [
+                { message: 'Foo' },
+                { message: 'Bar' }
+            ],
             name: null,
             prename: null,
             topictures: false,
             isInitial: true,
             isSaving: false,
             filesnum: 0,
-            info: null,
+            info: 'testinfo',
+            images: '',
+        },
+        updated() {
+            if (topictures) {
+                getimages(this.images);
+                //alert(this.info);
+            }
         },
         methods: {
             submitname() {
                 if (this.prename != null) {
                     this.name = this.prename;
                     this.topictures = true;
+                    getimages(this.images);
+                    //alert(this.info);
                 }
                 else {
                     this.topictures = false;
@@ -90,6 +114,8 @@
                         alert('Uploaded ' + this.filesnum + ' file(s).');
                         this.isInitial = true;
                         this.isSaving = false;
+                        getimages(this.images);
+                        //alert(this.info);
                     })
                     .catch(err => {
                         //this.uploadError = err.response;
@@ -139,10 +165,23 @@
     function upload(formData) {
         //const url = "${BASE_URL}/Home/Uploadfile";
         return axios.post("https://localhost:44361/api/FileUpload/Uploadfile", formData);
-            // get data
-            //.then(x => x.data)
-            // add url field
-            //.then(x => x.map(img => Object.assign({}, img, { url: `${BASE_URL}/images/${img.id}` })));
+        // get data
+        //.then(x => x.data)
+        // add url field
+        //.then(x => x.map(img => Object.assign({}, img, { url: `${BASE_URL}/images/${img.id}` })));
     }
+
+    function getimages(images) {
+
+        axios.get('https://localhost:44361/api/FileUpload/GetImages')
+            .then(response => { images = response.data; alert(images); });
+    }
+
+    //this.$http.get('https://localhost:44361/api/FileUpload/GetImages')
+        //    .then(response => {
+        //    this.info = response.data.map((row) => {
+        //        return { 'src': row }
+        //    });
+        //});
 
 </script>

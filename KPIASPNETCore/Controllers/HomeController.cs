@@ -7,11 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 using KPIASPNETCore.Models;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace KPIASPNETCore.Controllers
 {
     public class HomeController : Controller
     {
+        IHostingEnvironment _env;
+
+        public HomeController(IHostingEnvironment env)
+        {
+            _env = env;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -39,6 +47,18 @@ namespace KPIASPNETCore.Controllers
             // Don't rely on or trust the FileName property without validation.
 
             return Ok(new { count = files.Count, size, filePath });
+        }
+
+        //[HttpGet("GetImages")]
+        public JsonResult GetImages()
+        {
+            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            string[] fileEntries = Directory.GetFiles(folderPath);
+            return Json(fileEntries);
         }
 
         public IActionResult ImageBook()
