@@ -32,16 +32,20 @@
         text-align: center;
         padding: 50px 0;
     }
+    img {
+
+    }
 </style>
 
 <h1>Intro</h1>
 
 <div id="app">
+    <p>{{location ? 'Your domain is ' + location: null}}</p>
     <p>{{ name ? 'Welcome ' + name: 'Name yourself' }}</p>
     <div v-if="topictures">
-        <div class="container">
-            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
-                <h1>Upload images</h1>
+        <div style="display: inline-block; width: 100%">
+            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 70%'>
+                <h3>Upload images</h3>
                 <div class="dropbox">
                     <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
                     <p v-if="isInitial">
@@ -52,14 +56,23 @@
                     </p>
                 </div>
             </form>
+            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
+                <h3>Delete images</h3>
+                <div class="dropbox">
+                    <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
+                    <p v-if="isInitial">
+                        Drag your file(s) here to delete it
+                    </p>
+                </div>
+            </form>
         </div>
-        <div v-for="image in images" style="display:inline-block;">
-            <img v-bind:src="image" height="200">
-            </img>
-            <br/>
-            <label>{{name}}</label>
-            <br/>
-            <input v-model="comment" />
+        <br />
+        <div v-for="face in faces" style="display: inline-block;">
+            <img v-bind:src="face.image" height="200" />                
+            <br />
+            <label>{{face.author}}</label>
+            <br />
+            <input v-model="face.comment" />
         </div>
         <ul>
             <li v-for="image in images">
@@ -76,6 +89,7 @@
     var app = new Vue({
         el: '#app',
         data: {
+            location: null,
             name: null,
             prename: null,
             comment: null,
@@ -84,7 +98,10 @@
             isSaving: false,
             filesnum: 0,
             info: 'testinfo',
-            images: null,
+         faces: null,
+        },
+        mounted: function (event) {
+            this.location = window.location.origin;
         },
         updated() {
             if (this.topictures) {
@@ -151,17 +168,23 @@
                 }
             },
             getimages: function () {
-                axios.get('https://localhost:44361/api/FileUpload/GetImages')
+                axios.get(window.location.origin + '/api/FileUpload/GetImages')
                     .then(function (response) {
                         this.images = response.data;
+                        this.faces = [];
                         for (let i = 0; i < this.images.length; i++) {
+                            this.faces[i] = {
+                                image: window.location.origin + this.images[i],
+                                author: this.name,
+                                comment: null
+                            };
                             this.images[i] = window.location.origin + this.images[i];
                         }
                     }.bind(this))
                     .catch(function (error) { console.log(error); })
             },
             uploadImages: function (formData) {
-                return axios.post("https://localhost:44361/api/FileUpload/Uploadfile", formData);
+                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile', formData);
             }
         },
     });

@@ -67,7 +67,8 @@ namespace KPIASPNETCore.Controllers
         }
 
         public IActionResult Intro()
-        {            
+        {
+            ViewData["Message"] = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
             return View();
         }
 
