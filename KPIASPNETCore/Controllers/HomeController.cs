@@ -22,6 +22,7 @@ namespace KPIASPNETCore.Controllers
 
         public IActionResult Index()
         {
+            ViewData["Message"] = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
             return View();
         }
 
@@ -59,17 +60,6 @@ namespace KPIASPNETCore.Controllers
             }
             string[] fileEntries = Directory.GetFiles(folderPath);
             return Json(fileEntries);
-        }
-
-        public IActionResult ImageBook()
-        {
-            return View();
-        }
-
-        public IActionResult Intro()
-        {
-            ViewData["Message"] = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
-            return View();
         }
 
         public IActionResult Privacy()

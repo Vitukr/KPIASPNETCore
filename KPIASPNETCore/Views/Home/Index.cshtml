@@ -1,141 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-<div id="app">
-    {{ message }}
-</div>
-
-<script>
-    var app = new Vue({
-        el: '#app',
-        data: {
-            message: 'Hello Vue!'
-        }
-    })
-</script>
-
-<div id="app-2">
-    <span v-bind:title="message">
-        Hover your mouse over me for a few seconds
-        to see my dynamically bound title!
-    </span>
-</div>
-
-<script>
-    var app2 = new Vue({
-        el: '#app-2',
-        data: {
-            message: 'You loaded this page on ' + new Date().toLocaleString()
-        }
-    })
-</script>
-
-<div id="app-3">
-    <span v-if="seen">Now you see me</span>
-</div>
-
-<script>
-    var app3 = new Vue({
-        el: '#app-3',
-        data: {
-            seen: true
-        }
-    })
-</script>
-
-<div id="app-4">
-    <ol>
-        <li v-for="todo in todos">
-            {{ todo.text }}
-        </li>
-    </ol>
-</div>
-
-<script>
-    var app4 = new Vue({
-        el: '#app-4',
-        data: {
-            todos: [
-                { text: 'Learn JavaScript' },
-                { text: 'Learn Vue' },
-                { text: 'Build something awesome' }
-            ]
-        }
-    })
-</script>
-
-<div id="app-5">
-    <p>{{ message }}</p>
-    <button v-on:click="reverseMessage">Reverse Message</button>
-</div>
-
-<script>
-    var app5 = new Vue({
-        el: '#app-5',
-        data: {
-            message: 'Hello Vue.js!'
-        },
-        methods: {
-            reverseMessage: function () {
-                this.message = this.message.split('').reverse().join('')
-            }
-        }
-    })
-</script>
-
-<div id="app-6">
-    <p>{{ message }}</p>
-    <input v-model="message">
-</div>
-
-<script>
-    var app6 = new Vue({
-        el: '#app-6',
-        data: {
-            message: 'Hello Vue!'
-        }
-    })
-</script>
-
-<div id="app-7">
-    <p>
-        Моё имя <input v-model="name">
-        и мне <input v-model="age"> лет.
-    <p />
-    <button v-on:click="persist">Сохранить</button>
-</div>
-
-<script>
-    const app-7 = new Vue({
-        el: '#app',
-        data: {
-            name: '',
-            age: 0
-        },
-        mounted() {
-            if (localStorage.name) {
-                this.name = localStorage.name;
-            }
-            if (localStorage.age) {
-                this.age = localStorage.age;
-            }
-        },
-        methods: {
-            persist() {
-                localStorage.name = this.name;
-                localStorage.age = this.age;
-                console.log('теперь я притворяюсь, что сделал ещё кое-что...');
-            }
-        }
-    })
-</script>
-
-<!-- SASS styling -->
 <style lang="scss">
     .dropbox {
         outline: 2px dashed grey; /* the dash box */
@@ -165,5 +32,252 @@
         text-align: center;
         padding: 50px 0;
     }
+
+    img {
+    }
 </style>
 
+<h1>Index</h1>
+
+<div id="app">
+    <p>{{location ? 'Site domain is ' + location: null}}</p>
+    <p>{{ name ? 'Welcome ' + name: 'Name yourself' }}</p>
+    <div v-if="topictures">
+        <div style="display: inline-block; width: 100%">
+            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 70%'>
+                <h3>Upload images</h3>
+                <div class="dropbox">
+                    <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
+                    <p v-if="isInitial">
+                        Drag your file(s) here to begin<br> or click to browse
+                    </p>
+                    <p v-if="isSaving">
+                        Uploading files...
+                    </p>
+                </div>
+            </form>
+            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
+                <h3>Delete images</h3>
+                <div class="dropbox">
+                    <input type="file" class="input-file" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
+                    <p v-if="isInitial">
+                        Drag your file(s) here to delete it
+                    </p>
+                </div>
+            </form>
+        </div>
+        <br />
+        <div v-for="face in faces" style="display: inline-block;">
+            <img v-bind:src="face.image" height="200" draggable="true" v-on:dragstart="dragfile" />
+            <br />
+            <label>{{face.author}}</label>
+            <br />
+
+            <div class="rate">
+                <input type="radio" id="star5" name="rate" value="5" />
+                <label for="star5" title="text">5 stars</label>
+                <input type="radio" id="star4" name="rate" value="4" />
+                <label for="star4" title="text">4 stars</label>
+                <input type="radio" id="star3" name="rate" value="3" />
+                <label for="star3" title="text">3 stars</label>
+                <input type="radio" id="star2" name="rate" value="2" />
+                <label for="star2" title="text">2 stars</label>
+                <input type="radio" id="star1" name="rate" value="1" />
+                <label for="star1" title="text">1 star</label>
+            </div>
+
+        </div>
+
+    </div>
+    <div v-else>
+        <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname" />
+    </div>
+</div>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            location: null,
+            name: null,
+            prename: null,
+            comment: null,
+            topictures: false,
+            isInitial: true,
+            isSaving: false,
+            filesnum: 0,
+            info: 'testinfo',
+            rating: 0,
+            faces: null,
+        },
+        mounted: function (event) {
+            this.location = window.location.origin;
+        },
+        updated() {
+            if (this.topictures) {
+            }
+        },
+        methods: {
+            submitname() {
+                if (this.prename != null) {
+                    this.name = this.prename;
+                    this.topictures = true;
+                    this.getimages();
+                    //console.log(this.images);
+                }
+                else {
+                    this.topictures = false;
+                }
+            },
+            save(formData) {
+                // upload data to the server
+                this.uploadImages(formData)
+                    .then(() => {
+                        alert('Uploaded ' + this.filesnum + ' file(s).');
+                        this.isInitial = true;
+                        this.isSaving = false;
+                        this.getimages();
+                        //console.log(this.images);
+                    })
+                    .catch(err => {
+                        alert(err);
+                        this.isInitial = true;
+                        this.isSaving = false;
+                    });
+            },
+            filesChanged: function (event) {
+                this.isInitial = false;
+                this.isSaving = true;
+                var fieldName = event.target.name;
+                var files = event.target.files;
+                this.filesnum = event.target.files.length;
+                const formData = new FormData();
+
+                if (files.length > 0) {
+                    Array
+                        .from(Array(files.length).keys())
+                        .map(x => {
+                            if (files[x].type.includes("image")) {
+                                formData.append("files", files[x]);
+                            }
+                        });
+
+                    // save it
+                    var numfiles = 0;
+                    for (var key of formData.keys()) {
+                        numfiles++;
+                    }
+                    if (numfiles > 0) {
+                        this.save(formData);
+                    }
+                    else {
+                        alert('Not image file(s).');
+                        this.isInitial = true;
+                        this.isSaving = false;
+                    }
+                }
+            },
+            getimages: function () {
+                axios.get(window.location.origin + '/api/FileUpload/GetImages')
+                    .then(function (response) {
+                        this.images = response.data;
+                        this.faces = [];
+                        for (let i = 0; i < this.images.length; i++) {
+                            this.faces[i] = {
+                                image: window.location.origin + this.images[i],
+                                author: this.name,
+                                comment: null
+                            };
+                            this.images[i] = window.location.origin + this.images[i];
+                        }
+                    }.bind(this))
+                    .catch(function (error) { console.log(error); })
+            },
+            uploadImages: function (formData) {
+                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile', formData);
+            },
+            allowdrop: function (event) {
+                event.preventDefault();
+                //return true;
+            },
+            allowdrag: function (event) {
+                //return false;
+            },
+            dragfile: function (event) {
+                event.dataTransfer.setData("delimg", event.target.src);
+                this.info = event.target.src;
+            },
+            deletefile: function (event) {
+                event.preventDefault();
+                var fileName = event.dataTransfer.getData("delimg");
+                this.info = fileName;
+
+                var bodyFormData = new FormData();
+                //bodyFormData.append("files", fileName);
+                bodyFormData.set("files", fileName);
+
+                //fetch(window.location.origin + '/api/FileUpload/Deletefile', {
+                //    method: 'POST',
+                //    body: fileName
+                //});
+
+                //fetch(window.location.origin + '/api/FileUpload/Deletefile', fileName)
+                //    .then(function (response) {
+                //        alert('Deleted ' + fileName + ' file.');
+                //        this.getimages();
+                //    })
+                //    .catch(err => {
+                //        alert(err);
+                //    });
+
+                //axios.post(window.location.origin + '/api/FileUpload/Deletefile', bodyFormData)
+                //    .then(() => {
+                //        alert('Deleted ' + fileName + ' file.');
+                //        this.getimages();
+                //    })
+                //    .catch(err => {
+                //        alert(err);
+                //    });
+
+                axios.get(window.location.origin + '/api/FileUpload/Deletefile?files=' + fileName)
+                    .then(() => {
+                        alert('Deleted ' + fileName + ' file.');
+                        this.getimages();
+                    })
+                    .catch(err => {
+                        alert(err);
+                    });
+
+                //var xhr = new XMLHttpRequest();
+                //xhr.open('POST', window.location.origin + '/api/FileUpload/Deletefile', fileName, { contentType: 'application/x-www-form-urlencoded'});
+                //xhr.send();
+            },
+        },
+    });
+
+    //const BASE_URL = 'https://localhost:44361/';
+
+    //function getimages() {
+        //return
+        //axios.get('https://localhost:44361/api/FileUpload/GetImages')
+        //    .then(response => response.data)
+        //    .then(data => { this.images = data; alert(this.images);});
+
+        //fetch('https://localhost:44361/api/FileUpload/GetImages').then(function (response) {
+        //    if (response.ok) {
+        //        return response.json();
+        //    }
+        //    throw new Error('Network response was not ok.');
+        //}).then(function (json) {
+        //    this.images = [
+        //        { message: 'Foo1' },
+        //        { message: 'Bar1' }
+        //    ];
+        //    alert(this.images);
+        //}).catch(function (error) {
+        //    console.log('There has been a problem with your fetch operation: ' + error.message);
+        //});
+
+    //}
+
+</script>
