@@ -59,7 +59,7 @@
             <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
                 <h3>Delete images</h3>
                 <div class="dropbox">
-                    <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
+                    <input type="file" class="input-file" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
                     <p v-if="isInitial">
                         Drag your file(s) here to delete it
                     </p>
@@ -68,7 +68,7 @@
         </div>
         <br />
         <div v-for="face in faces" style="display: inline-block;">
-            <img v-bind:src="face.image" height="200" />                
+            <img v-bind:src="face.image" height="200" draggable="true" v-on:dragstart="dragfile" />
             <br />
             <label>{{face.author}}</label>
             <br />
@@ -79,6 +79,7 @@
                 {{ image }}
             </li>
         </ul>
+        <label>{{info}}</label>
     </div>
     <div v-else>
         <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname" />
@@ -185,10 +186,66 @@
             },
             uploadImages: function (formData) {
                 return axios.post(window.location.origin + '/api/FileUpload/Uploadfile', formData);
-            }
+            },
+            allowdrop: function (event) {
+                event.preventDefault();
+                //return true;
+            },
+            allowdrag: function (event) {
+                //return false;
+            },
+            dragfile: function (event) {
+                event.dataTransfer.setData("delimg", event.target.src);
+                this.info = event.target.src;
+            },
+            deletefile: function (event) {
+                event.preventDefault();
+                var fileName = event.dataTransfer.getData("delimg");
+                this.info = fileName;
+
+                var bodyFormData = new FormData(); 
+                //bodyFormData.append("files", fileName);
+                bodyFormData.set("files", fileName);
+
+                //fetch(window.location.origin + '/api/FileUpload/Deletefile', {
+                //    method: 'POST',
+                //    body: fileName
+                //});
+
+                //fetch(window.location.origin + '/api/FileUpload/Deletefile', fileName)
+                //    .then(function (response) {
+                //        alert('Deleted ' + fileName + ' file.');
+                //        this.getimages();
+                //    })
+                //    .catch(err => {
+                //        alert(err);
+                //    }); 
+
+                //axios.post(window.location.origin + '/api/FileUpload/Deletefile', bodyFormData)
+                //    .then(() => {
+                //        alert('Deleted ' + fileName + ' file.');
+                //        this.getimages();
+                //    })
+                //    .catch(err => {
+                //        alert(err);
+                //    }); 
+
+                axios.get(window.location.origin + '/api/FileUpload/Deletefile?files=' + fileName)
+                    .then(() => {
+                        alert('Deleted ' + fileName + ' file.');
+                        this.getimages();
+                    })
+                    .catch(err => {
+                        alert(err);
+                    }); 
+                
+                //var xhr = new XMLHttpRequest();
+                //xhr.open('POST', window.location.origin + '/api/FileUpload/Deletefile', fileName, { contentType: 'application/x-www-form-urlencoded'});
+                //xhr.send();
+            },
         },
     });
-
+    
     //const BASE_URL = 'https://localhost:44361/';
 
     //function getimages() {

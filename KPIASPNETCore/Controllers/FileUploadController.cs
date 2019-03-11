@@ -67,5 +67,50 @@ namespace KPIASPNETCore.Controllers
             }
             return files;
         }
+
+        //[HttpPost("Deletefile")]
+        //public IActionResult PostDelete(List<IFormFile> files)
+        //{
+        //    long size = files.Sum(f => f.Length);
+        //    var folderPath = Path.Combine(_env.WebRootPath, "images");
+
+        //    //if(!string.IsNullOrEmpty(file))
+        //    //{
+        //    //    var fullName = Path.Combine(folderPath, file);
+        //    //    if (System.IO.File.Exists(fullName))
+        //    //    {
+        //    //        System.IO.File.Delete(fullName);
+        //    //    }
+        //    //}
+
+        //    foreach (var formFile in files)
+        //    {
+        //        var fullName = Path.Combine(folderPath, formFile.FileName);
+        //        if (System.IO.File.Exists(fullName))
+        //        {
+        //            System.IO.File.Delete(fullName);
+        //        }
+        //    }
+
+        //    return Ok(new { deleted = "deleted" });
+        //}
+
+        [HttpGet("Deletefile")]
+        public IActionResult GetDelete(string files)
+        {
+            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            var filename = Path.GetFileName(files);
+
+            if (!string.IsNullOrEmpty(filename))
+            {
+                var fullName = Path.Combine(folderPath, filename);
+                if (System.IO.File.Exists(fullName))
+                {
+                    System.IO.File.Delete(fullName);
+                }
+            }
+
+            return Ok(new { deleted = "deleted" });
+        }
     }
 }
