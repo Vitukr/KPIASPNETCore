@@ -262,3 +262,7 @@ __pycache__/
 /KPIASPNETCore/wwwroot/images
 /KPIASPNETCore/wwwroot/images
 /KPIASPNETCore/Properties/PublishProfiles
+/KPIASPNETCore/Properties/PublishProfiles/*.pubxml
+/KPIASPNETCore/Properties/PublishProfiles/*.user
+/KPIASPNETCore/*.user
+/KPIASPNETCore/KPIASPNETCore.csproj.user
