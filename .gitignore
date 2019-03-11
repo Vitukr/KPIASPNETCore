@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /KPIASPNETCore/wwwroot/images
 /KPIASPNETCore/wwwroot/images
+/KPIASPNETCore/Properties/PublishProfiles
