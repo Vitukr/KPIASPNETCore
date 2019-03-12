@@ -15,6 +15,7 @@ namespace KPIASPNETCore.Controllers
     public class FileUploadController : ControllerBase // IHostingEnvironment env
     {
         IHostingEnvironment _env;
+        string imagefolder = "imagestest";
 
         public FileUploadController(IHostingEnvironment env)
         {
@@ -27,7 +28,7 @@ namespace KPIASPNETCore.Controllers
             long size = files.Sum(f => f.Length);
 
             // full path to file in temp location
-            var folderPath = Path.Combine(_env.WebRootPath, "images"); //Path.GetTempFileName();
+            var folderPath = Path.Combine(_env.WebRootPath, imagefolder); //Path.GetTempFileName();
             if(!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -53,7 +54,7 @@ namespace KPIASPNETCore.Controllers
         [HttpGet("GetImages")]
         public ActionResult<IEnumerable<string>> GetImages()
         {
-            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            var folderPath = Path.Combine(_env.WebRootPath, imagefolder);
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -63,7 +64,7 @@ namespace KPIASPNETCore.Controllers
             string[] fileEntries = Directory.GetFiles(folderPath);
             foreach(var file in fileEntries)
             {
-                files.Add((Path.Combine("/images", Path.GetFileName(file))).Replace('\\', '/'));
+                files.Add((Path.Combine("/" + imagefolder, Path.GetFileName(file))).Replace('\\', '/'));
             }
             return files;
         }
@@ -98,7 +99,7 @@ namespace KPIASPNETCore.Controllers
         [HttpGet("Deletefile")]
         public IActionResult GetDelete(string files)
         {
-            var folderPath = Path.Combine(_env.WebRootPath, "images");
+            var folderPath = Path.Combine(_env.WebRootPath, imagefolder);
             var filename = Path.GetFileName(files);
 
             if (!string.IsNullOrEmpty(filename))
