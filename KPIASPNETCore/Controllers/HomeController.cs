@@ -14,6 +14,7 @@ namespace KPIASPNETCore.Controllers
     public class HomeController : Controller
     {
         IHostingEnvironment _env;
+        string imagefolder = "imagestest";
 
         public HomeController(IHostingEnvironment env)
         {
@@ -22,6 +23,7 @@ namespace KPIASPNETCore.Controllers
 
         public IActionResult Index()
         {
+            ViewData["folderPath"] = Path.Combine(_env.WebRootPath, imagefolder);
             ViewData["Message"] = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.PathBase}";
             return View();
         }

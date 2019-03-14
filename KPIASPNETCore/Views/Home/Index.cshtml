@@ -3,44 +3,12 @@
     ViewData["Title"] = "Index";
 }
 
-<style lang="scss">
-    .dropbox {
-        outline: 2px dashed grey; /* the dash box */
-        outline-offset: -10px;
-        background: lightcyan;
-        color: dimgray;
-        padding: 10px 10px;
-        min-height: 200px; /* minimum height */
-        position: relative;
-        cursor: pointer;
-    }
-
-    .input-file {
-        opacity: 0; /* invisible but it's there! */
-        width: 100%;
-        height: 200px;
-        position: absolute;
-        cursor: pointer;
-    }
-
-    .dropbox:hover {
-        background: lightblue; /* when mouse over to the drop zone, change color */
-    }
-
-    .dropbox p {
-        font-size: 1.2em;
-        text-align: center;
-        padding: 50px 0;
-    }
-
-    img {
-    }
-</style>
-
 <h1>Index</h1>
 
 <div id="app">
     <p>{{location ? 'Site domain is ' + location: null}}</p>
+    <p>@ViewData["folderPath"]</p>
+    <p>@ViewData["Message"]</p>
     <p>{{ name ? 'Welcome ' + name: 'Name yourself' }}</p>
     <div v-if="topictures">
         <div style="display: inline-block; width: 100%">
@@ -73,7 +41,7 @@
             <label>{{face.author}}</label>
             <br />
 
-            <div class="rate">
+            @*<div class="rate">
                 <input type="radio" v-bind:id="star5 + face.image" v-bind:name="face.image" value="5" />
                 <label v-bind:for="star5 + face.image" title="text">5 stars</label>
                 <input type="radio" v-bind:id="star4 + face.image" v-bind:name="face.image" value="4" />
@@ -84,10 +52,10 @@
                 <label v-bind:for="star2 + face.image" title="text">2 stars</label>
                 <input type="radio" v-bind:id="star1 + face.image" v-bind:name="face.image" value="1" />
                 <label v-bind:for="star1 + face.image" title="text">1 star</label>
-            </div>
+            </div>*@
         </div>
-        <ul v-for="face in faces">
-            <li>{{face.image}}</li>
+        <ul v-for="image in images">
+            <li>{{image}}</li>
         </ul>
 
     </div>
@@ -111,6 +79,7 @@
             info: 'testinfo',
             rating: 0,
             faces: null,
+            images: null,
         },
         mounted: function (event) {
             this.location = window.location.origin;
@@ -163,6 +132,7 @@
                                 formData.append("files", files[x]);
                             }
                         });
+                    //formData.set("user", name);
 
                     // save it
                     var numfiles = 0;
@@ -180,23 +150,53 @@
                 }
             },
             getimages: function () {
+                this.faces = [];
+                //fetch(window.location.origin + '/api/FileUpload/GetImages')
+                //    .then(function (response) { return response.json(); })
+                //    .then(function (data) {
+                //        alert(data);
+                //        for (var i = 0; i < data.length; i++) {
+                //            this.faces[i] = {
+                //                image: window.location.origin + data[i].fileName,
+                //                author: data[i].author,
+                //                rate: data[i].rate
+                //            }
+                //            data[i].Name
+                //        }
+                //    });
+
                 axios.get(window.location.origin + '/api/FileUpload/GetImages')
                     .then(function (response) {
-                        this.images = response.data;
-                        this.faces = [];
-                        for (let i = 0; i < this.images.length; i++) {
-                            this.faces[i] = {
-                                image: window.location.origin + this.images[i],
-                                author: this.name,
-                                comment: null
-                            };
-                            this.images[i] = window.location.origin + this.images[i];
+                        //this.data = JSON.parse(response.data);
+                        var data = response.data;
+                        alert(data);
+                        for (let i = 0; i < data.length; i++) {
+                            var items = data[i].split(',');
+                            var temp;
+                            temp.id = items[0];
+                            temp.image = window.location.origin + items[1];
+                            temp.author = items[2];
+                            temp.rate = items[3];
+                            this.faces.push(temp);
                         }
                     }.bind(this))
-                    .catch(function (error) { console.log(error); })
+                    .catch(function (error) { console.log(error); }); // .bind(this)
+
+                //$.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
+                //    alert(result);
+                //    $.each(result, function (i, data) {
+                //        this.faces[i] = {
+                //            id: data.id,
+                //            image: window.location.origin + data.fileName,
+                //            author: data.author,
+                //            rate: data.rate
+                //        };
+                //    });
+                //});
+
             },
             uploadImages: function (formData) {
-                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile', formData);
+                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile?name=' + this.name, formData);
             },
             allowdrop: function (event) {
                 event.preventDefault();
