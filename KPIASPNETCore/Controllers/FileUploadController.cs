@@ -31,20 +31,9 @@ namespace KPIASPNETCore.Controllers
             long size = files.Sum(f => f.Length);
 
             // full path to file in temp location
-            var folderPath = Path.Combine(_env.WebRootPath, imagefolder); //Path.GetTempFileName();
-            if(!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
+            var folderPath = TestDirectory();
 
-            //var filesToDelete = HttpContext.Request.Params["filesToDelete"];
-            var records = new List<Imagedto>();
-            var jsonfilepath = Path.Combine(_env.WebRootPath, jsonfile);
-
-            if (System.IO.File.Exists(jsonfilepath))
-            {
-                records = JsonConvert.DeserializeObject<List<Imagedto>>(System.IO.File.ReadAllText(jsonfilepath));
-            }
+            var records = ParseRecords();
 
             foreach (var formFile in files)
             {
@@ -70,21 +59,9 @@ namespace KPIASPNETCore.Controllers
         }
 
         [HttpGet("GetImages")]
-        public IEnumerable<string> GetImages()
+        public JsonResult GetImages()
         {
-            //var folderPath = Path.Combine(_env.WebRootPath, imagefolder);
-            //if (!Directory.Exists(folderPath))
-            //{
-            //    Directory.CreateDirectory(folderPath);
-            //}
-
-            var records = new List<Imagedto>();
-            var jsonfilepath = Path.Combine(_env.WebRootPath, jsonfile);            
-
-            if (System.IO.File.Exists(jsonfilepath))
-            {
-                records = JsonConvert.DeserializeObject<List<Imagedto>>(System.IO.File.ReadAllText(jsonfilepath));
-            }
+            var records = ParseRecords();
 
             //List<string> files = new List<string>();
             //string[] fileEntries = Directory.GetFiles(folderPath);
@@ -93,19 +70,18 @@ namespace KPIASPNETCore.Controllers
             //    files.Add((Path.Combine("/" + imagefolder, Path.GetFileName(file))).Replace('\\', '/'));
             //}
 
-            //var json = JsonConvert.SerializeObject(records);
-            //var result = new JsonResult(records.Select(r =>  r.Id.ToString() + "," + r.FileName + "," + r.Author + "," + r.Rate.ToString()));
-            //var result = new JsonResult(records);
-            var result = records.Select(r => r.Id.ToString() + "," + r.FileName + "," + r.Author + "," + r.Rate.ToString());
+            var result = new JsonResult(records);
+            //var result = records.Select(r => r.Id.ToString() + "," + r.FileName + "," + r.Author + "," + r.Rate.ToString());
 
             return result; 
         }
 
         [HttpGet("Deletefile")]
-        public IActionResult GetDelete(string files)
+        public async Task<IActionResult> GetDelete(string fileName)
         {
             var folderPath = Path.Combine(_env.WebRootPath, imagefolder);
-            var filename = Path.GetFileName(files);
+            var filename = Path.GetFileName(fileName);
+            var records = ParseRecords();
 
             if (!string.IsNullOrEmpty(filename))
             {
@@ -114,9 +90,50 @@ namespace KPIASPNETCore.Controllers
                 {
                     System.IO.File.Delete(fullName);
                 }
+                var record = records.Where(r => r.FileName == filename).FirstOrDefault();
+                if(records.Remove(record))
+                {
+                    await System.IO.File.WriteAllTextAsync(Path.Combine(_env.WebRootPath, jsonfile), JsonConvert.SerializeObject(records));
+                    return Ok();
+                }
+                return NotFound();
             }
 
-            return Ok(new { deleted = "deleted" });
+            return NotFound();
+        }
+
+        [HttpGet("SetRate")]
+        public async Task<IActionResult> GetSetRate(int id, int rate)
+        {
+            var records = ParseRecords();
+            var record = records.Where(r => r.Id == id).FirstOrDefault();
+            record.Rate = rate;
+
+            await System.IO.File.WriteAllTextAsync(Path.Combine(_env.WebRootPath, jsonfile), JsonConvert.SerializeObject(records));
+
+            return Ok();
+        }
+
+        public List<Imagedto> ParseRecords()
+        {
+            var records = new List<Imagedto>();
+            var jsonfilepath = Path.Combine(_env.WebRootPath, jsonfile);
+
+            if (System.IO.File.Exists(jsonfilepath))
+            {
+                records = JsonConvert.DeserializeObject<List<Imagedto>>(System.IO.File.ReadAllText(jsonfilepath));
+            }
+            return records;
+        }
+
+        public string TestDirectory()
+        {
+            var folderPath = Path.Combine(_env.WebRootPath, imagefolder); //Path.GetTempFileName();
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            return folderPath;
         }
     }
 }

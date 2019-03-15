@@ -1,15 +1,10 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Vue";
 }
 
-<h1>Index</h1>
-
 <div id="app">
-    <p>{{location ? 'Site domain is ' + location: null}}</p>
-    <p>@ViewData["folderPath"]</p>
-    <p>@ViewData["Message"]</p>
-    <p>{{ name ? 'Welcome ' + name: 'Name yourself' }}</p>
+    <div><h1>{{ name ? 'Welcome ' + name + ' to Imagebook. Now you can upload on page your images and rate any': 'Please, introduce youreself for entering Imagebook' }}</h1></div>
     <div v-if="topictures">
         <div style="display: inline-block; width: 100%">
             <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 70%'>
@@ -17,7 +12,7 @@
                 <div class="dropbox">
                     <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
                     <p v-if="isInitial">
-                        Drag your file(s) here to begin<br> or click to browse
+                        Drag your file(s) here to upload<br> or click to browse images
                     </p>
                     <p v-if="isSaving">
                         Uploading files...
@@ -27,40 +22,40 @@
             <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
                 <h3>Delete images</h3>
                 <div class="dropbox">
-                    <input type="file" class="input-file" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
+                    <input type="file" name="files" class="input-file" onclick="return false" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
                     <p v-if="isInitial">
-                        Drag your file(s) here to delete it
+                        Drag your file here to delete it from Imagebook
                     </p>
                 </div>
             </form>
         </div>
         <br />
         <div v-for="face in faces" style="display: inline-block;">
-            <img v-bind:src="face.image" height="200" draggable="true" v-on:dragstart="dragfile" />
-            <br />
-            <label>{{face.author}}</label>
-            <br />
+            <div style="margin: 5px;">
+                <img v-bind:src="face.fileName" height="200" width="200" draggable="true" v-on:dragstart="dragfile" />
+            </div>
 
-            @*<div class="rate">
-                <input type="radio" v-bind:id="star5 + face.image" v-bind:name="face.image" value="5" />
-                <label v-bind:for="star5 + face.image" title="text">5 stars</label>
-                <input type="radio" v-bind:id="star4 + face.image" v-bind:name="face.image" value="4" />
-                <label v-bind:for="star4 + face.image" title="text">4 stars</label>
-                <input type="radio" v-bind:id="star3 + face.image" v-bind:name="face.image" value="3" />
-                <label v-bind:for="star3 + face.image" title="text">3 stars</label>
-                <input type="radio" v-bind:id="star2 + face.image" v-bind:name="face.image" value="2" />
-                <label v-bind:for="star2 + face.image" title="text">2 stars</label>
-                <input type="radio" v-bind:id="star1 + face.image" v-bind:name="face.image" value="1" />
-                <label v-bind:for="star1 + face.image" title="text">1 star</label>
-            </div>*@
+            <div class="rate">
+                <input type="radio" v-bind:id="face.star5" v-bind:name="face.id" value="5" v-on:click="setRate" v-model="face.rate" />
+                <label v-bind:for="face.star5" title="5 stars">5 stars</label>
+                <input type="radio" v-bind:id="face.star4" v-bind:name="face.id" value="4" v-on:click="setRate" v-model="face.rate" />
+                <label v-bind:for="face.star4" title="4 stars">4 stars</label>
+                <input type="radio" v-bind:id="face.star3" v-bind:name="face.id" value="3" v-on:click="setRate" v-model="face.rate" />
+                <label v-bind:for="face.star3" title="3 stars">3 stars</label>
+                <input type="radio" v-bind:id="face.star2" v-bind:name="face.id" value="2" v-on:click="setRate" v-model="face.rate" />
+                <label v-bind:for="face.star2" title="2 stars">2 stars</label>
+                <input type="radio" v-bind:id="face.star1" v-bind:name="face.id" value="1" v-on:click="setRate" v-model="face.rate" />
+                <label v-bind:for="face.star1" title="1 star">1 star</label>
+            </div>
+            <ul>
+                <li>Author: {{face.author}}</li>
+                <li>Votes: {{face.votes}}</li>
+            </ul>
         </div>
-        <ul v-for="image in images">
-            <li>{{image}}</li>
-        </ul>
 
     </div>
     <div v-else>
-        <input placeholder="Enter your name" v-model="prename" v-on:keyup.enter="submitname" />
+        <input id="intro" placeholder="Enter here your name and press Enter" v-model="prename" v-on:keyup.enter="submitname" style="width: 300px;"/>
     </div>
 </div>
 
@@ -89,6 +84,15 @@
             }
         },
         methods: {
+            setRate: function ( event) {
+                var star = event.target.value;
+                var id = event.target.name;
+                console.log('Star: ' + star);
+                console.log('Id: ' + id);
+                axios.get(window.location.origin + '/api/FileUpload/SetRate?id=' + id + '&rate=' + star)
+                    .then(() => {  })
+                    .catch(err => { alert(err); });
+            },
             submitname() {
                 if (this.prename != null) {
                     this.name = this.prename;
@@ -104,7 +108,7 @@
                 // upload data to the server
                 this.uploadImages(formData)
                     .then(() => {
-                        alert('Uploaded ' + this.filesnum + ' file(s).');
+                        //alert('Uploaded ' + this.filesnum + ' file(s).');
                         this.isInitial = true;
                         this.isSaving = false;
                         this.getimages();
@@ -151,49 +155,19 @@
             },
             getimages: function () {
                 this.faces = [];
-                //fetch(window.location.origin + '/api/FileUpload/GetImages')
-                //    .then(function (response) { return response.json(); })
-                //    .then(function (data) {
-                //        alert(data);
-                //        for (var i = 0; i < data.length; i++) {
-                //            this.faces[i] = {
-                //                image: window.location.origin + data[i].fileName,
-                //                author: data[i].author,
-                //                rate: data[i].rate
-                //            }
-                //            data[i].Name
-                //        }
-                //    });
-
-                axios.get(window.location.origin + '/api/FileUpload/GetImages')
-                    .then(function (response) {
-                        //this.data = JSON.parse(response.data);
-                        var data = response.data;
-                        alert(data);
-                        for (let i = 0; i < data.length; i++) {
-                            var items = data[i].split(',');
-                            var temp;
-                            temp.id = items[0];
-                            temp.image = window.location.origin + items[1];
-                            temp.author = items[2];
-                            temp.rate = items[3];
-                            this.faces.push(temp);
-                        }
-                    }.bind(this))
-                    .catch(function (error) { console.log(error); }); // .bind(this)
-
-                //$.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
-                //    alert(result);
-                //    $.each(result, function (i, data) {
-                //        this.faces[i] = {
-                //            id: data.id,
-                //            image: window.location.origin + data.fileName,
-                //            author: data.author,
-                //            rate: data.rate
-                //        };
-                //    });
-                //});
-
+                $.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
+                    this.faces = result;
+                    for (let i = 0; i < this.faces.length; i++) {
+                        this.faces[i].fileName = window.location.origin + '/imagestest/' + this.faces[i].fileName;
+                        this.faces[i].star1 = this.faces[i].id + 'star1';
+                        this.faces[i].star2 = this.faces[i].id + 'star2';
+                        this.faces[i].star3 = this.faces[i].id + 'star3';
+                        this.faces[i].star4 = this.faces[i].id + 'star4';
+                        this.faces[i].star5 = this.faces[i].id + 'star5';
+                        
+                        console.log(this.faces[i].rate);
+                    }
+                }.bind(this)); // .bind(this)
             },
             uploadImages: function (formData) {
                 return axios.post(window.location.origin + '/api/FileUpload/Uploadfile?name=' + this.name, formData);
@@ -212,47 +186,11 @@
             deletefile: function (event) {
                 event.preventDefault();
                 var fileName = event.dataTransfer.getData("delimg");
-                this.info = fileName;
-
-                var bodyFormData = new FormData();
-                //bodyFormData.append("files", fileName);
-                bodyFormData.set("files", fileName);
-
-                //fetch(window.location.origin + '/api/FileUpload/Deletefile', {
-                //    method: 'POST',
-                //    body: fileName
-                //});
-
-                //fetch(window.location.origin + '/api/FileUpload/Deletefile', fileName)
-                //    .then(function (response) {
-                //        alert('Deleted ' + fileName + ' file.');
-                //        this.getimages();
-                //    })
-                //    .catch(err => {
-                //        alert(err);
-                //    });
-
-                //axios.post(window.location.origin + '/api/FileUpload/Deletefile', bodyFormData)
-                //    .then(() => {
-                //        alert('Deleted ' + fileName + ' file.');
-                //        this.getimages();
-                //    })
-                //    .catch(err => {
-                //        alert(err);
-                //    });
-
-                axios.get(window.location.origin + '/api/FileUpload/Deletefile?files=' + fileName)
-                    .then(() => {
-                        alert('Deleted ' + fileName + ' file.');
-                        this.getimages();
-                    })
-                    .catch(err => {
-                        alert(err);
-                    });
-
-                //var xhr = new XMLHttpRequest();
-                //xhr.open('POST', window.location.origin + '/api/FileUpload/Deletefile', fileName, { contentType: 'application/x-www-form-urlencoded'});
-                //xhr.send();
+                console.log('fileName delete: ' + fileName);
+                
+                axios.get(window.location.origin + '/api/FileUpload/Deletefile?fileName=' + fileName)
+                    .then(() => { this.getimages(); })
+                    .catch(err => { alert(err); });
             },
         },
     });
