@@ -93,7 +93,13 @@ namespace KPIASPNETCore.Controllers
                 var record = records.Where(r => r.FileName == filename).FirstOrDefault();
                 if(records.Remove(record))
                 {
+                    for (int i = 0; i < records.Count; i++)
+                    {
+                        records[i].Id = i;
+                    }
+
                     await System.IO.File.WriteAllTextAsync(Path.Combine(_env.WebRootPath, jsonfile), JsonConvert.SerializeObject(records));
+                    
                     return Ok();
                 }
                 return NotFound();
