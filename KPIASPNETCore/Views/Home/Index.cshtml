@@ -4,220 +4,72 @@
 }
 
 <div id="app">
-    <div><h1>{{ name ? 'Welcome ' + name + ' to Imagebook. Now you can upload on page your images and rate any': 'Please, introduce youreself for entering Imagebook' }}</h1></div>
+    <div><h1>{{ name ? 'Welcome ' + name + ' to Imagebook.' : 'Please, introduce youreself for entering Imagebook' }}</h1></div>
     <div v-if="topictures">
-        <div style="display: inline-block; width: 100%">
-            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 70%'>
-                <h3>Upload images</h3>
-                <div class="dropbox">
-                    <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
-                    <p v-if="isInitial">
-                        Drag your file(s) here to upload<br> or click to browse images
-                    </p>
-                    <p v-if="isSaving">
-                        Uploading files...
-                    </p>
-                </div>
-            </form>
-            <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
-                <h3>Delete images</h3>
-                <div class="dropbox">
-                    <input type="file" name="files" class="input-file" onclick="return false" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
-                    <p v-if="isInitial">
-                        Drag your file here to delete it from Imagebook
-                    </p>
-                </div>
-            </form>
-        </div>
-        <br />
-        <div v-for="face in faces" style="display: inline-block;">
-            <div style="margin: 5px;">
-                <img v-bind:src="face.fileName" height="200" width="200" draggable="true" v-on:dragstart="dragfile" />
-            </div>
-
-            <div class="rate">
-                <input type="radio" v-bind:id="face.star5" v-bind:name="face.id" value="5" v-on:click="setRate" v-model="face.rate" />
-                <label v-bind:for="face.star5" title="5 stars">5 stars</label>
-                <input type="radio" v-bind:id="face.star4" v-bind:name="face.id" value="4" v-on:click="setRate" v-model="face.rate" />
-                <label v-bind:for="face.star4" title="4 stars">4 stars</label>
-                <input type="radio" v-bind:id="face.star3" v-bind:name="face.id" value="3" v-on:click="setRate" v-model="face.rate" />
-                <label v-bind:for="face.star3" title="3 stars">3 stars</label>
-                <input type="radio" v-bind:id="face.star2" v-bind:name="face.id" value="2" v-on:click="setRate" v-model="face.rate" />
-                <label v-bind:for="face.star2" title="2 stars">2 stars</label>
-                <input type="radio" v-bind:id="face.star1" v-bind:name="face.id" value="1" v-on:click="setRate" v-model="face.rate" />
-                <label v-bind:for="face.star1" title="1 star">1 star</label>
-            </div>
-            <ul>
-                <li>Author: {{face.author}}</li>
-                <li>Votes: {{face.votes}}</li>
+        <div v-if="showsuggest">
+            <h3>Suggestions for improving this site</h3> <button v-on:click="setshowsuggest">Hide suggestions</button>
+            <ul v-for="sugg in suggestions">
+                <li><label>Author:</label> <input type="text" readonly v-bind:value="sugg.name" style="width: 200;"> <label>Suggestion:</label> <input type="text" readonly v-bind:value="sugg.suggestion" style="width: 1000px;">  <label>Done:</label> <input type="checkbox" v-model="sugg.done" /></li>
             </ul>
         </div>
+        <div v-else>
+            <div>
+                <h3>Write your suggestion to improve this site</h3> <button v-on:click="setshowsuggest">Show suggestions</button>
+                <br />
+                <input id="suggestme" placeholder="Write your suggestion here and press Enter" v-model="suggest" v-on:keyup.enter="submitsugest" style="width: 1000px;" />
 
+            </div>
+            <br />
+            <h2>{{ name ? 'You can upload on this page your images and rate any' : null }}</h2>
+            <div style="display: inline-block; width: 100%">
+                <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 70%'>
+                    <h3>Upload images</h3>
+                    <div class="dropbox">
+                        <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
+                        <p v-if="isInitial">
+                            Drag your file(s) here to upload<br> or click to browse images
+                        </p>
+                        <p v-if="isSaving">
+                            Uploading files...
+                        </p>
+                    </div>
+                </form>
+                <form method="post" enctype="multipart/form-data" novalidate v-if="isInitial || isSaving" style='float: left; padding: 5px; width: 25%'>
+                    <h3>Delete images</h3>
+                    <div class="dropbox">
+                        <input type="file" name="files" class="input-file" onclick="return false" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
+                        <p v-if="isInitial">
+                            Drag your file here to delete it from Imagebook
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <br />
+            <div v-for="face in faces" style="display: inline-block;">
+                <div style="margin: 5px;">
+                    <img v-bind:src="face.fileName" height="200" width="200" draggable="true" v-on:dragstart="dragfile" />
+                </div>
+
+                <div class="rate">
+                    <input type="radio" v-bind:id="face.star5" v-bind:name="face.id" value="5" v-on:click="setRate" v-model="face.rate" />
+                    <label v-bind:for="face.star5" title="5 stars">5 stars</label>
+                    <input type="radio" v-bind:id="face.star4" v-bind:name="face.id" value="4" v-on:click="setRate" v-model="face.rate" />
+                    <label v-bind:for="face.star4" title="4 stars">4 stars</label>
+                    <input type="radio" v-bind:id="face.star3" v-bind:name="face.id" value="3" v-on:click="setRate" v-model="face.rate" />
+                    <label v-bind:for="face.star3" title="3 stars">3 stars</label>
+                    <input type="radio" v-bind:id="face.star2" v-bind:name="face.id" value="2" v-on:click="setRate" v-model="face.rate" />
+                    <label v-bind:for="face.star2" title="2 stars">2 stars</label>
+                    <input type="radio" v-bind:id="face.star1" v-bind:name="face.id" value="1" v-on:click="setRate" v-model="face.rate" />
+                    <label v-bind:for="face.star1" title="1 star">1 star</label>
+                </div>
+                <ul>
+                    <li>Author: {{face.author}}</li>
+                    <li>Votes: {{face.votes}}</li>
+                </ul>
+            </div>
+        </div>
     </div>
     <div v-else>
         <input id="intro" placeholder="Enter here your name and press Enter" v-model="prename" v-on:keyup.enter="submitname" style="width: 300px;"/>
     </div>
 </div>
-
-<script>
-    var app = new Vue({
-        el: '#app',
-        data: {
-            location: null,
-            name: null,
-            prename: null,
-            comment: null,
-            topictures: false,
-            isInitial: true,
-            isSaving: false,
-            filesnum: 0,
-            info: 'testinfo',
-            rating: 0,
-            faces: null,
-            images: null,
-        },
-        mounted: function (event) {
-            this.location = window.location.origin;
-        },
-        updated() {
-            if (this.topictures) {
-            }
-        },
-        methods: {
-            setRate: function ( event) {
-                var star = event.target.value;
-                var id = event.target.name;
-                console.log('Star: ' + star);
-                console.log('Id: ' + id);
-                axios.get(window.location.origin + '/api/FileUpload/SetRate?id=' + id + '&rate=' + star)
-                    .then(() => {  })
-                    .catch(err => { alert(err); });
-            },
-            submitname() {
-                if (this.prename != null) {
-                    this.name = this.prename;
-                    this.topictures = true;
-                    this.getimages();
-                    //console.log(this.images);
-                }
-                else {
-                    this.topictures = false;
-                }
-            },
-            save(formData) {
-                // upload data to the server
-                this.uploadImages(formData)
-                    .then(() => {
-                        //alert('Uploaded ' + this.filesnum + ' file(s).');
-                        this.isInitial = true;
-                        this.isSaving = false;
-                        this.getimages();
-                        //console.log(this.images);
-                    })
-                    .catch(err => {
-                        alert(err);
-                        this.isInitial = true;
-                        this.isSaving = false;
-                    });
-            },
-            filesChanged: function (event) {
-                this.isInitial = false;
-                this.isSaving = true;
-                var fieldName = event.target.name;
-                var files = event.target.files;
-                this.filesnum = event.target.files.length;
-                const formData = new FormData();
-
-                if (files.length > 0) {
-                    Array
-                        .from(Array(files.length).keys())
-                        .map(x => {
-                            if (files[x].type.includes("image")) {
-                                formData.append("files", files[x]);
-                            }
-                        });
-                    //formData.set("user", name);
-
-                    // save it
-                    var numfiles = 0;
-                    for (var key of formData.keys()) {
-                        numfiles++;
-                    }
-                    if (numfiles > 0) {
-                        this.save(formData);
-                    }
-                    else {
-                        alert('Not image file(s).');
-                        this.isInitial = true;
-                        this.isSaving = false;
-                    }
-                }
-            },
-            getimages: function () {
-                this.faces = [];
-                $.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
-                    this.faces = result;
-                    for (let i = 0; i < this.faces.length; i++) {
-                        this.faces[i].fileName = window.location.origin + '/imagestest/' + this.faces[i].fileName;
-                        this.faces[i].star1 = this.faces[i].id + 'star1';
-                        this.faces[i].star2 = this.faces[i].id + 'star2';
-                        this.faces[i].star3 = this.faces[i].id + 'star3';
-                        this.faces[i].star4 = this.faces[i].id + 'star4';
-                        this.faces[i].star5 = this.faces[i].id + 'star5';
-                        
-                        console.log(this.faces[i].rate);
-                    }
-                }.bind(this)); // .bind(this)
-            },
-            uploadImages: function (formData) {
-                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile?name=' + this.name, formData);
-            },
-            allowdrop: function (event) {
-                event.preventDefault();
-                //return true;
-            },
-            allowdrag: function (event) {
-                //return false;
-            },
-            dragfile: function (event) {
-                event.dataTransfer.setData("delimg", event.target.src);
-                this.info = event.target.src;
-            },
-            deletefile: function (event) {
-                event.preventDefault();
-                var fileName = event.dataTransfer.getData("delimg");
-                console.log('fileName delete: ' + fileName);
-                
-                axios.get(window.location.origin + '/api/FileUpload/Deletefile?fileName=' + fileName)
-                    .then(() => { this.getimages(); })
-                    .catch(err => { alert(err); });
-            },
-        },
-    });
-
-    //const BASE_URL = 'https://localhost:44361/';
-
-    //function getimages() {
-        //return
-        //axios.get('https://localhost:44361/api/FileUpload/GetImages')
-        //    .then(response => response.data)
-        //    .then(data => { this.images = data; alert(this.images);});
-
-        //fetch('https://localhost:44361/api/FileUpload/GetImages').then(function (response) {
-        //    if (response.ok) {
-        //        return response.json();
-        //    }
-        //    throw new Error('Network response was not ok.');
-        //}).then(function (json) {
-        //    this.images = [
-        //        { message: 'Foo1' },
-        //        { message: 'Bar1' }
-        //    ];
-        //    alert(this.images);
-        //}).catch(function (error) {
-        //    console.log('There has been a problem with your fetch operation: ' + error.message);
-        //});
-
-    //}
-
-</script>

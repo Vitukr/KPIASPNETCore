@@ -19,6 +19,7 @@ namespace KPIASPNETCore.Controllers
         IHostingEnvironment _env;
         string imagefolder = "imagestest";
         string jsonfile = "records.json";
+        string jsonsuggest = "suggests.json";
 
         public FileUploadController(IHostingEnvironment env)
         {
@@ -63,15 +64,7 @@ namespace KPIASPNETCore.Controllers
         {
             var records = ParseRecords();
 
-            //List<string> files = new List<string>();
-            //string[] fileEntries = Directory.GetFiles(folderPath);
-            //foreach (var file in fileEntries)
-            //{
-            //    files.Add((Path.Combine("/" + imagefolder, Path.GetFileName(file))).Replace('\\', '/'));
-            //}
-
             var result = new JsonResult(records);
-            //var result = records.Select(r => r.Id.ToString() + "," + r.FileName + "," + r.Author + "," + r.Rate.ToString());
 
             return result; 
         }
@@ -120,6 +113,30 @@ namespace KPIASPNETCore.Controllers
             return Ok();
         }
 
+        [HttpPost("PostSuggestion")]
+        public async Task<IActionResult> PostSuggestion([FromForm]string name, [FromForm]string suggest)
+        {
+            var folderPath = TestDirectory();
+
+            var records = ParseSuggest();
+
+            Suggest record = new Suggest() { Id = records.Count, Name = name, Suggestion = suggest };
+            records.Add(record);
+
+            await System.IO.File.WriteAllTextAsync(Path.Combine(_env.WebRootPath, jsonsuggest), JsonConvert.SerializeObject(records));
+            return Ok();
+        }
+
+        [HttpGet("GetSuggests")]
+        public JsonResult GetSuggests()
+        {
+            var records = ParseSuggest();
+
+            var result = new JsonResult(records);
+
+            return result;
+        }
+
         public List<Imagedto> ParseRecords()
         {
             var records = new List<Imagedto>();
@@ -128,6 +145,18 @@ namespace KPIASPNETCore.Controllers
             if (System.IO.File.Exists(jsonfilepath))
             {
                 records = JsonConvert.DeserializeObject<List<Imagedto>>(System.IO.File.ReadAllText(jsonfilepath));
+            }
+            return records;
+        }
+
+        public List<Suggest> ParseSuggest()
+        {
+            var records = new List<Suggest>();
+            var jsonfilepath = Path.Combine(_env.WebRootPath, jsonsuggest);
+
+            if (System.IO.File.Exists(jsonfilepath))
+            {
+                records = JsonConvert.DeserializeObject<List<Suggest>>(System.IO.File.ReadAllText(jsonfilepath));
             }
             return records;
         }
