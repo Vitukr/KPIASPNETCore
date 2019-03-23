@@ -265,3 +265,4 @@ __pycache__/
 /KPIASPNETCore/*.user
 /KPIASPNETCore/KPIASPNETCore.csproj.user
 /KPIASPNETCore/wwwroot/records.json
+/KPIASPNETCore/wwwroot/suggests.json
