@@ -7,27 +7,30 @@
         el: '#app',
         data: {
         location: null,
-    name: null,
-    prename: null,
-    comment: null,
-    topictures: false,
-    isInitial: true,
-    isSaving: false,
-    filesnum: 0,
-    info: 'testinfo',
-    rating: 0,
-    faces: null,
-    images: null,
-    suggest: null,
-    suggestions: null,
-    showsuggest: false,
-},
+        name: null,
+        prename: null,
+        comment: null,
+        topictures: false,
+        isInitial: true,
+        isSaving: false,
+        filesnum: 0,
+        info: 'testinfo',
+        rating: 0,
+        faces: null,
+        images: null,
+        suggest: null,
+        suggestions: null,
+        showsuggest: false
+    },
         mounted: function (event) {
-        this.location = window.location.origin;
+            this.location = window.location.origin;            
+            this.name = localStorage.getItem('vuename');
+            if (this.name) {
+                this.topictures = true;
+            }
     },
         updated() {
-            if (this.topictures) {
-    }
+            
     },
         computed: {
 
@@ -41,7 +44,7 @@
     axios.get(window.location.origin + '/api/FileUpload/SetRate?id=' + id + '&rate=' + star)
                     .then(() => {})
                     .catch(err => {alert(err); });
-},
+    },
             submitsugest: function (event) {
                 var bodyFormData = new FormData();
     bodyFormData.set('name', this.name);
@@ -49,7 +52,7 @@
     axios.post(window.location.origin + '/api/FileUpload/PostSuggestion', bodyFormData)
                     .then(() => {this.getsuggests(); this.showsuggest = true; })
                     .catch(err => {alert(err); });
-},
+    },
             getsuggests: function () {
         $.getJSON(window.location.origin + '/api/FileUpload/GetSuggests', function (result) {
             this.suggestions = result;
@@ -62,8 +65,9 @@
     }
 },
             submitname() {
-                if (this.prename != null) {
-        this.name = this.prename;
+                if (this.prename !== null) {
+                    this.name = this.prename;
+                    localStorage.setItem('vuename', this.name);
     this.topictures = true;
     this.getimages();
 }

@@ -5,7 +5,7 @@
 
 <div id="app">
     <div><h1>{{ name ? 'Welcome ' + name + ' to Imagebook.' : 'Please, introduce youreself for entering Imagebook' }}</h1></div>
-    <div v-if="topictures">
+    <div v-if="name">
         <div v-if="showsuggest">
             <h3>Suggestions for improving this site</h3> <button v-on:click="setshowsuggest">Hide suggestions</button>
             <ul v-for="sugg in suggestions">
