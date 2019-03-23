@@ -3,14 +3,14 @@
 
 // Write your JavaScript code.
 
-    var app = new Vue({
-        el: '#app',
+var app = new Vue({
+    el: '#app',
         data: {
         location: null,
         name: null,
         prename: null,
         comment: null,
-        topictures: false,
+        //topictures: false,
         isInitial: true,
         isSaving: false,
         filesnum: 0,
@@ -22,62 +22,63 @@
         suggestions: null,
         showsuggest: false
     },
-        mounted: function (event) {
+    mounted: function (event) {
             this.location = window.location.origin;            
             this.name = localStorage.getItem('vuename');
-            if (this.name) {
-                this.topictures = true;
-            }
+            //if (this.name) {
+            //    this.topictures = true;
+            //}
+            this.getimages();
     },
-        updated() {
+    updated() {
             
     },
-        computed: {
+    computed: {
 
     },
-        methods: {
+    methods: {
         setRate: function ( event) {
-                var star = event.target.value;
-    var id = event.target.name;
-    console.log('Star: ' + star);
-    console.log('Id: ' + id);
-    axios.get(window.location.origin + '/api/FileUpload/SetRate?id=' + id + '&rate=' + star)
+            var star = event.target.value;
+            var id = event.target.name;
+            console.log('Star: ' + star);
+            console.log('Id: ' + id);
+            axios.get(window.location.origin + '/api/FileUpload/SetRate?id=' + id + '&rate=' + star)
                     .then(() => {})
                     .catch(err => {alert(err); });
-    },
-            submitsugest: function (event) {
-                var bodyFormData = new FormData();
-    bodyFormData.set('name', this.name);
-    bodyFormData.set('suggest', this.suggest);
-    axios.post(window.location.origin + '/api/FileUpload/PostSuggestion', bodyFormData)
+        },
+        submitsugest: function (event) {
+            var bodyFormData = new FormData();
+            bodyFormData.set('name', this.name);
+            bodyFormData.set('suggest', this.suggest);
+            axios.post(window.location.origin + '/api/FileUpload/PostSuggestion', bodyFormData)
                     .then(() => {this.getsuggests(); this.showsuggest = true; })
                     .catch(err => {alert(err); });
-    },
-            getsuggests: function () {
-        $.getJSON(window.location.origin + '/api/FileUpload/GetSuggests', function (result) {
-            this.suggestions = result;
-        }.bind(this));
-    },
-            setshowsuggest: function () {
-        this.showsuggest = !this.showsuggest;
-    if (this.showsuggest) {
-        this.getsuggests();
-    }
-},
-            submitname() {
-                if (this.prename !== null) {
-                    this.name = this.prename;
-                    localStorage.setItem('vuename', this.name);
-    this.topictures = true;
-    this.getimages();
-}
-                else {
-        this.topictures = false;
-    }
-},
-            save(formData) {
-        // upload data to the server
-        this.uploadImages(formData)
+        },
+        getsuggests: function () {
+            $.getJSON(window.location.origin + '/api/FileUpload/GetSuggests', function (result) {
+                this.suggestions = result;
+            }.bind(this));
+        },
+        setshowsuggest: function () {
+            this.showsuggest = !this.showsuggest;
+            if (this.showsuggest) {
+                this.getsuggests();
+            }
+        },
+        submitname() {
+            if (this.prename !== null) {
+                this.name = this.prename;
+                localStorage.setItem('vuename', this.name);
+                this.topictures = true;
+                this.getimages();
+            }
+            else {
+                this.topictures = false;
+            }
+        },
+        save(formData) {
+            // upload data to the server
+            this.uploadImages(formData)
             .then(() => {
                 this.isInitial = true;
                 this.isSaving = false;
@@ -88,80 +89,76 @@
                 this.isInitial = true;
                 this.isSaving = false;
             });
-    },
-            filesChanged: function (event) {
-        this.isInitial = false;
-    this.isSaving = true;
-    var fieldName = event.target.name;
-    var files = event.target.files;
-    this.filesnum = event.target.files.length;
-    const formData = new FormData();
+        },
+        filesChanged: function (event) {
+            this.isInitial = false;
+            this.isSaving = true;
+            var files = event.target.files;
+            this.filesnum = event.target.files.length;
+            const formData = new FormData();
 
-                if (files.length > 0) {
-        Array
-            .from(Array(files.length).keys())
-            .map(x => {
-                if (files[x].type.includes("image")) {
-                    formData.append("files", files[x]);
+            if (files.length > 0) {
+                Array
+                    .from(Array(files.length).keys())
+                    .map(x => {
+                        if (files[x].type.includes("image")) {
+                            formData.append("files", files[x]);
+                        }
+                });
+
+                // save it
+                var numfiles = 0;
+                for (var key of formData.keys()) {
+                    numfiles++;
                 }
-            });
-    //formData.set("user", name);
-
-    // save it
-    var numfiles = 0;
-                    for (var key of formData.keys()) {
-        numfiles++;
-    }
-                    if (numfiles > 0) {
-        this.save(formData);
-    }
-                    else {
-        alert('Not image file(s).');
-    this.isInitial = true;
-    this.isSaving = false;
-}
-}
-},
-            getimages: function () {
-        this.faces = [];
-    $.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
-        this.faces = result;
-    for (let i = 0; i < this.faces.length; i++) {
-        this.faces[i].fileName = window.location.origin + '/imagestest/' + this.faces[i].fileName;
-    this.faces[i].star1 = this.faces[i].id + 'star1';
-    this.faces[i].star2 = this.faces[i].id + 'star2';
-    this.faces[i].star3 = this.faces[i].id + 'star3';
-    this.faces[i].star4 = this.faces[i].id + 'star4';
-    this.faces[i].star5 = this.faces[i].id + 'star5';
+                if (numfiles > 0) {
+                    this.save(formData);
+                }
+                else {
+                alert('Not image file(s).');
+                this.isInitial = true;
+                this.isSaving = false;
+                }
+            }
+        },
+        getimages: function () {
+            this.faces = [];
+            $.getJSON(window.location.origin + '/api/FileUpload/GetImages', function (result) {
+                this.faces = result;
+                for (let i = 0; i < this.faces.length; i++) {
+                    this.faces[i].fileName = window.location.origin + '/imagestest/' + this.faces[i].fileName;
+                    this.faces[i].star1 = this.faces[i].id + 'star1';
+                    this.faces[i].star2 = this.faces[i].id + 'star2';
+                    this.faces[i].star3 = this.faces[i].id + 'star3';
+                    this.faces[i].star4 = this.faces[i].id + 'star4';
+                    this.faces[i].star5 = this.faces[i].id + 'star5';
    
-    console.log(this.faces[i].rate);
-}
-}.bind(this)); // .bind(this)
-},
-            uploadImages: function (formData) {
-                return axios.post(window.location.origin + '/api/FileUpload/Uploadfile?name=' + this.name, formData);
-},
-            allowdrop: function (event) {
-        event.preventDefault();
-    //return true;
-    },
-            allowdrag: function (event) {
-        //return false;
-    },
-            dragfile: function (event) {
-        event.dataTransfer.setData("delimg", event.target.src);
-    this.info = event.target.src;
-},
-            deletefile: function (event) {
-        event.preventDefault();
-    var fileName = event.dataTransfer.getData("delimg");
-    console.log('fileName delete: ' + fileName);
+                    console.log(this.faces[i].rate);
+                }
+            }.bind(this)); // .bind(this)
+        },
+        uploadImages: function (formData) {
+            return axios.post(window.location.origin + '/api/FileUpload/Uploadfile?name=' + this.name, formData);
+        },
+        allowdrop: function (event) {
+            event.preventDefault();
+        },
+        allowdrag: function (event) {
+        },
+        dragfile: function (event) {
+            event.dataTransfer.setData("delimg", event.target.src);
+            this.info = event.target.src;
+        },
+        deletefile: function (event) {
+            event.preventDefault();
+            var fileName = event.dataTransfer.getData("delimg");
+            console.log('fileName delete: ' + fileName);
    
-    axios.get(window.location.origin + '/api/FileUpload/Deletefile?fileName=' + fileName)
+            axios.get(window.location.origin + '/api/FileUpload/Deletefile?fileName=' + fileName)
                     .then(() => {this.getimages(); })
                     .catch(err => {alert(err); });
-},
-},
+        },
+    },
 });
 
 //const BASE_URL = 'https://localhost:44361/';
