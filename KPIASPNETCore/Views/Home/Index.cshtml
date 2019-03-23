@@ -27,7 +27,7 @@
                     <div class="dropbox">
                         <input type="file" name="files" multiple class="input-file" v-on:change="filesChanged" v-bind:disable="isSaving" accept="image/*">
                         <p v-if="isInitial">
-                            Drag your file(s) here to upload<br> or click to browse images
+                            To upload image(s) to Imagebook site drag image(s) here from local folder <br> or click to browse image(s)
                         </p>
                         <p v-if="isSaving">
                             Uploading files...
@@ -39,7 +39,7 @@
                     <div class="dropbox">
                         <input type="file" name="files" class="input-file" onclick="return false" accept="image/*" v-on:drop="deletefile" v-on:dragover="allowdrop">
                         <p v-if="isInitial">
-                            Drag your file here to delete it from Imagebook
+                            Drag image here to delete it from Imagebook
                         </p>
                     </div>
                 </form>
