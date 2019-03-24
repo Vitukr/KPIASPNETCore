@@ -3,6 +3,14 @@
     ViewData["Title"] = "Vue";
 }
 
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script src="~/js/site.js"></script>
+
 <div id="app">
     <div><h1>{{ name ? 'Welcome ' + name + ' to Imagebook.' : 'Please, introduce youreself for entering Imagebook' }}</h1></div>
     <div v-if="name">
@@ -47,7 +55,7 @@
             <br />
             <div v-for="face in faces" style="display: inline-block;">
                 <div style="margin: 5px;">
-                    <img v-bind:src="face.fileName" height="200" width="200" draggable="true" v-on:dragstart="dragfile" />
+                    <img ref="mainimg" v-bind:src="face.fileName" height="200" width="200" draggable="true" v-on:dragstart="dragfile" v-on:click="popupimg" />
                 </div>
 
                 <div class="rate">
@@ -66,10 +74,20 @@
                     <li>Author: {{face.author}}</li>
                     <li>Votes: {{face.votes}}</li>
                 </ul>
+
+                <!-- The Modal -->
+                <div id="imgmodal" ref="popuppic" class="modal" v-on:click="closemodal">
+
+                    <!-- Modal content -->
+                    <div class="modal-content" style="max-width: 80%;">
+                        <img id="imgpopup" style="max-width: 100%;" />
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
     <div v-else>
-        <input id="intro" placeholder="Enter here your name and press Enter" v-model="prename" v-on:keyup.enter="submitname" style="width: 300px;"/>
+        <input id="intro" placeholder="Enter here your name and press Enter" v-model="prename" v-on:keyup.enter="submitname" style="width: 300px;" />
     </div>
 </div>

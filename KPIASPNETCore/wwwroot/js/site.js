@@ -25,9 +25,6 @@ var app = new Vue({
     mounted: function (event) {
             this.location = window.location.origin;            
             this.name = localStorage.getItem('vuename');
-            //if (this.name) {
-            //    this.topictures = true;
-            //}
             this.getimages();
     },
     updated() {
@@ -37,6 +34,19 @@ var app = new Vue({
 
     },
     methods: {
+        popupimg: function (event) {
+            console.log('modal');
+            var modal = document.getElementById('imgmodal');
+            modal.style.display = "block";
+            var img = document.getElementById('imgpopup');
+            img.src = event.target.src;
+            //this.$refs.popuppic.
+        },
+        closemodal: function (event) {
+            console.log('closemodal');
+            var modal = document.getElementById('imgmodal');
+            modal.style.display = "none";
+        },
         setRate: function ( event) {
             var star = event.target.value;
             var id = event.target.name;
@@ -160,29 +170,4 @@ var app = new Vue({
         },
     },
 });
-
-//const BASE_URL = 'https://localhost:44361/';
-
-    //function getimages() {
-        //return
-        //axios.get('https://localhost:44361/api/FileUpload/GetImages')
-        //    .then(response => response.data)
-        //    .then(data => { this.images = data; alert(this.images);});
-
-        //fetch('https://localhost:44361/api/FileUpload/GetImages').then(function (response) {
-        //    if (response.ok) {
-        //        return response.json();
-        //    }
-        //    throw new Error('Network response was not ok.');
-        //}).then(function (json) {
-        //    this.images = [
-        //        { message: 'Foo1' },
-        //        { message: 'Bar1' }
-        //    ];
-        //    alert(this.images);
-        //}).catch(function (error) {
-        //    console.log('There has been a problem with your fetch operation: ' + error.message);
-        //});
-
-    //}
 
